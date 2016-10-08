@@ -12,15 +12,14 @@ module mojo_top (
     input avr_tx,           // AVR TX (FPGA RX)
     output avr_rx,          // AVR RX (FPGA TX)
     input avr_rx_busy,       // AVR RX buffer full
-    output a_in,
-    output b_in,
-    output c_in,
-    input s_out,
-    input c_out
+    output a_in,            // input a to adder
+    output b_in,            // input b to adder
+    output c_in,            // input c0 to adder
+    input s_out,            // output s from adder
+    input c_out             // output c1 from adder
   ) {
   
   sig rst;                  // reset signal
-  //sig result[2];            // adder result
   sig adder_input[3];       // adder input
   
   .clk(clk) {
@@ -28,7 +27,9 @@ module mojo_top (
     // clock. This ensures the entire FPGA comes out of reset at the same time.
     reset_conditioner reset_cond;
     .rst(rst){
+      // blinker control the blinky LED and hold time for chekcing in each state
       blinker myBlinker;
+      // finite state machine to check the adder functionality (F = false = 0, T = true = 1)
       fsm state(#INIT(FFF)) = {FFF,FFT,FTF,FTT,TFF,TFT,TTF,TTT,PASS};
     }
   }
@@ -46,9 +47,6 @@ module mojo_top (
     b_in = 0;
     c_in = 0;
     
-    
-   // result[0] = (adder_input[0] ^ adder_input[1]) ^ adder_input[2];
-    //result[1] = ((adder_input[0] ^ adder_input[1]) & adder_input[2]) | (adder_input[0] & adder_input[1]);
     
     case(state.q){
       state.FFF:
@@ -126,6 +124,7 @@ module mojo_top (
           state.d = state.PASS;
         }
       state.PASS:
+      // Yay ! We have passed the test! 
         led = 8x{myBlinker.blink};
     }
     

@@ -2,7 +2,7 @@ module blinker (
     input clk,  // clock
     input rst,  // reset
     output blink, // output to LED
-    output hold_time[27]
+    output hold_time[27] // output to control the time
   ) {
 
   dff counter[26](.clk(clk), .rst(rst));
