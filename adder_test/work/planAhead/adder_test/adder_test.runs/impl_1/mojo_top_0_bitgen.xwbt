@@ -1,0 +1,8 @@
+INTSTYLE=pa
+INFILE=D:\aWork\SUTDTerm4\Computational Structure\MojoWorkspace\adder_test\work\planAhead\adder_test\adder_test.runs\impl_1\mojo_top_0_routed.ncd
+OUTFILE=D:\aWork\SUTDTerm4\Computational Structure\MojoWorkspace\adder_test\work\planAhead\adder_test\adder_test.runs\impl_1\mojo_top_0.bit
+FAMILY=Spartan6
+PART=xc6slx9-2tqg144
+WORKINGDIR=D:\aWork\SUTDTerm4\Computational Structure\MojoWorkspace\adder_test\work\planAhead\adder_test\adder_test.runs\impl_1
+LICENSE=WebPack
+USER_INFO=211247334_0_0_672

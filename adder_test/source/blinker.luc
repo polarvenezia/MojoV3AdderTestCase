@@ -1,0 +1,17 @@
+module blinker (
+    input clk,  // clock
+    input rst,  // reset
+    output blink, // output to LED
+    output hold_time[27]
+  ) {
+
+  dff counter[26](.clk(clk), .rst(rst));
+  dff holder[27](.clk(clk), .rst(rst));
+  
+  always {
+    blink = counter.q[24];
+    counter.d = counter.q + 1;
+    hold_time = holder.q[26:0];
+    holder.d = holder.q + 1;
+  }
+}

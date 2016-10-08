@@ -1,0 +1,133 @@
+module mojo_top (
+    input clk,              // 50MHz clock
+    input clk_new,
+    input rst_n,            // reset button (active low)
+    output led [8],         // 8 user controllable LEDs
+    input cclk,             // configuration clock, AVR ready when high
+    output spi_miso,        // AVR SPI MISO
+    input spi_ss,           // AVR SPI Slave Select
+    input spi_mosi,         // AVR SPI MOSI
+    input spi_sck,          // AVR SPI Clock
+    output spi_channel [4], // AVR general purpose pins (used by default to select ADC channel)
+    input avr_tx,           // AVR TX (FPGA RX)
+    output avr_rx,          // AVR RX (FPGA TX)
+    input avr_rx_busy,       // AVR RX buffer full
+    output a_in,
+    output b_in,
+    output c_in,
+    input s_out,
+    input c_out
+  ) {
+  
+  sig rst;                  // reset signal
+  //sig result[2];            // adder result
+  sig adder_input[3];       // adder input
+  
+  .clk(clk) {
+    // The reset conditioner is used to synchronize the reset signal to the FPGA
+    // clock. This ensures the entire FPGA comes out of reset at the same time.
+    reset_conditioner reset_cond;
+    .rst(rst){
+      blinker myBlinker;
+      fsm state(#INIT(FFF)) = {FFF,FFT,FTF,FTT,TFF,TFT,TTF,TTT,PASS};
+    }
+  }
+  
+  always {
+    reset_cond.in = ~rst_n; // input raw inverted reset signal
+    rst = reset_cond.out;   // conditioned reset
+    adder_input = 3x{0};
+    led = 8h00;             // turn LEDs off
+    spi_miso = bz;          // not using SPI
+    spi_channel = bzzzz;    // not using flags
+    avr_rx = bz;            // not using serial port
+    
+    a_in = 0;
+    b_in = 0;
+    c_in = 0;
+    
+    
+   // result[0] = (adder_input[0] ^ adder_input[1]) ^ adder_input[2];
+    //result[1] = ((adder_input[0] ^ adder_input[1]) & adder_input[2]) | (adder_input[0] & adder_input[1]);
+    
+    case(state.q){
+      state.FFF:
+        led[0] = myBlinker.blink;
+        if (s_out == 0 && c_out == 0){
+          if (myBlinker.hold_time == 1)
+            state.d = state.FFT;
+        } 
+      state.FFT:
+        adder_input=c{0,0,1};
+        a_in = 1;
+        led[0] = 1;
+        led[1] = myBlinker.blink;
+        if (s_out == 1 && c_out == 0){
+          if (myBlinker.hold_time == 1)
+            state.d = state.FTF;
+        }
+      state.FTF:
+        adder_input=c{0,1,0};
+        b_in = 1;
+        led[1:0] = 2x{1};
+        led[2] = myBlinker.blink;
+        if (s_out == 1 && c_out == 0){
+          if (myBlinker.hold_time == 1)
+          state.d = state.FTT;
+        }
+      state.FTT:
+        adder_input=c{0,1,1};
+        a_in = 1;
+        b_in = 1;
+        led[2:0] = 3x{1};
+        led[3] = myBlinker.blink;
+        if (s_out == 0 && c_out == 1){
+          if (myBlinker.hold_time == 1)
+          state.d = state.TFF;
+        }
+      state.TFF:
+        adder_input=c{1,0,0};
+        c_in = 1;
+        led[3:0] = 4x{1};
+        led[4] = myBlinker.blink;
+        if (s_out == 1 && c_out == 0){
+          if (myBlinker.hold_time == 1)
+          state.d = state.TFT;
+        }
+      state.TFT:
+        adder_input=c{1,0,1};
+        a_in = 1;
+        c_in = 1;
+        led[4:0] = 5x{1};
+        led[5] = myBlinker.blink;
+        if (s_out == 0 && c_out == 1){
+          if (myBlinker.hold_time == 1)
+          state.d = state.TTF;
+        }
+      state.TTF:
+        adder_input=c{1,1,0};
+        c_in = 1;
+        b_in = 1;
+        led[5:0] = 6x{1};
+        led[6] = myBlinker.blink;
+        if (s_out == 0 && c_out == 1){
+          if (myBlinker.hold_time == 1)
+          state.d = state.TTT;
+        }
+      state.TTT:
+        adder_input=c{1,1,1};
+        a_in = 1;
+        b_in = 1;
+        c_in = 1;
+        led[6:0] = 7x{1};
+        led[7] = myBlinker.blink;
+        if (s_out == 1 && c_out == 1){
+          if (myBlinker.hold_time == 1)
+          state.d = state.PASS;
+        }
+      state.PASS:
+        led = 8x{myBlinker.blink};
+    }
+    
+  }
+}

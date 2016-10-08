@@ -1,0 +1,12 @@
+NET "a_in" LOC = P2 | IOSTANDARD = LVTTL;
+
+NET "b_in" LOC = P8 | IOSTANDARD = LVTTL;
+
+NET "c_in" LOC = P12 | IOSTANDARD = LVTTL;
+
+NET "s_out" LOC = P30 | IOSTANDARD = LVTTL;
+
+NET "c_out" LOC = P35 | IOSTANDARD = LVTTL;
+
+NET "clk_new" TNM_NET = clk_new;
+TIMESPEC TS_clk = PERIOD "clk_new" 50 Hz HIGH 50%;
